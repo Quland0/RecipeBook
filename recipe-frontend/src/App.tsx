@@ -1,5 +1,9 @@
 function App() {
-    return <div>Recipe App</div>;
+    return (
+        <div className="bg-black text-white p-10 text-3xl">
+            Tailwind работает
+        </div>
+    );
 }
 
 export default App;
