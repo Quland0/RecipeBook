@@ -1,9 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { api } from "../api/axios";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -12,82 +11,29 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 
-type Recipe = {
-    id: number;
-    documentId: string;
-    title: string;
-    description: string;
-    cookingTime: number;
-    image: { url: string } | null;
-    category: { id: number; name: string } | null;
-};
+import { PageLoader } from "@/components/page/PageLoader";
+import { PageError } from "@/components/page/PageError";
 
-type Category = {
-    id: number;
-    documentId: string;
-    name: string;
-    slug: string | null;
-};
-
-type StrapiListResponse<T> = {
-    data: T[];
-    meta: any;
-};
-
+import { useCategories, useRecipes } from "@/api/queries";
+import type { Category, Recipe } from "@/types/recipe";
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:1337";
 
 const HomePage = () => {
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState<string>("");
     const [categoryId, setCategoryId] = useState<number | null>(null);
 
-    const categoriesQuery = useQuery<Category[]>({
-        queryKey: ["categories"],
-        queryFn: async () => {
-            const res = await api.get<StrapiListResponse<Category>>("/categories");
-            return res.data.data;
-        },
-        staleTime: 30000,
-    });
-
-    const recipesQuery = useQuery<Recipe[]>({
-        queryKey: ["recipes"],
-        queryFn: async () => {
-            const res = await api.get<StrapiListResponse<Recipe>>(
-                "/recipes?populate=*"
-            );
-            return res.data.data;
-        },
-        staleTime: 30000,
-    });
+    const categoriesQuery = useCategories();
+    const recipesQuery = useRecipes();
 
     const isLoading = categoriesQuery.isLoading || recipesQuery.isLoading;
+    const isError = categoriesQuery.isError || recipesQuery.isError;
 
-    if (isLoading) {
-        return (
-            <div className="p-10 grid grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="space-y-3">
-                        <Skeleton className="h-48 w-full rounded-xl" />
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </div>
-                ))}
-            </div>
-        );
-    }
+    if (isLoading) return <PageLoader />;
+    if (isError) return <PageError />;
 
-    if (recipesQuery.isError || categoriesQuery.isError) {
-        return (
-            <div className="p-10">
-                <p className="text-red-500">Ошибка загрузки данных</p>
-            </div>
-        );
-    }
-
-    const recipes = recipesQuery.data ?? [];
-    const categories = categoriesQuery.data ?? [];
+    const recipes: Recipe[] = recipesQuery.data ?? [];
+    const categories: Category[] = categoriesQuery.data ?? [];
 
     const filteredRecipes = recipes
         .filter((recipe) =>
@@ -138,9 +84,9 @@ const HomePage = () => {
             </div>
 
             {filteredRecipes.length === 0 ? (
-                <p className="text-muted-foreground">Ничего не найдено 😕</p>
+                <p className="text-muted-foreground">Ничего не найдено</p>
             ) : (
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredRecipes.map((recipe) => (
                         <Card key={recipe.id} className="overflow-hidden">
                             {recipe.image && (
@@ -162,15 +108,13 @@ const HomePage = () => {
                                         {recipe.category?.name ?? ""}
                                     </Badge>
 
-                                    <p className="text-muted-foreground">
-                                        ⏱ {recipe.cookingTime} мин
-                                    </p>
+                                    <p className="text-muted-foreground">{recipe.cookingTime} мин</p>
                                 </div>
                             </CardContent>
 
                             <CardFooter>
                                 <Button asChild>
-                                    <Link to={`/recipes/${recipe.id}`}>Открыть рецепт</Link>
+                                    <Link to={`/recipes/${recipe.documentId}`}>Открыть рецепт</Link>
                                 </Button>
                             </CardFooter>
                         </Card>
