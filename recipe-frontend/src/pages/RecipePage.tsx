@@ -1,24 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../api/axios";
+import { api } from "@/api/axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-type Recipe = {
-    id: number;
-    documentId: string;
-    title: string;
-    description: string;
-    cookingTime: number;
-    image: { url: string } | null;
-    category: { id: number; name: string } | null;
-};
-
-type StrapiResponse<T> = {
-    data: T;
-    meta?: any;
-};
+import type { Recipe, StrapiResponse } from "@/types/recipe";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:1337";
 
@@ -29,7 +15,7 @@ export default function RecipePage() {
         queryKey: ["recipe", documentId],
         queryFn: async () => {
             const res = await api.get<StrapiResponse<Recipe>>(
-                `/recipes/${documentId}?populate=*`
+                `/recipes/${documentId}?populate[image][fields][0]=url&populate[category][fields][0]=name&populate[author][fields][0]=username`
             );
             return res.data.data;
         },
@@ -76,14 +62,23 @@ export default function RecipePage() {
 
             <h1 className="text-3xl font-bold">{data.title}</h1>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
                 <Badge variant="secondary">
                     {data.category?.name ?? "Без категории"}
                 </Badge>
-                <span className="text-muted-foreground"> {data.cookingTime} мин</span>
+
+                <span className="text-muted-foreground">
+          {data.cookingTime} мин
+        </span>
+
+                {data.author?.username && (
+                    <span className="text-muted-foreground">
+             {data.author.username}
+          </span>
+                )}
             </div>
 
-            <div className="whitespace-pre-line leading-relaxed text-lg space-y-4">
+            <div className="whitespace-pre-line leading-relaxed text-lg">
                 {data.description}
             </div>
         </div>

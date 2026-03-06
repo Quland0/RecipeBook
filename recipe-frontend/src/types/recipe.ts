@@ -1,3 +1,8 @@
+export type Author = {
+    id: number;
+    username: string;
+};
+
 export type Recipe = {
     id: number;
     documentId: string;
@@ -6,6 +11,7 @@ export type Recipe = {
     cookingTime: number;
     image: { url: string } | null;
     category: { id: number; name: string } | null;
+    author: Author | null;
 };
 
 export type Category = {
@@ -18,4 +24,9 @@ export type Category = {
 export type StrapiListResponse<T> = {
     data: T[];
     meta: any;
+};
+
+export type StrapiResponse<T> = {
+    data: T;
+    meta?: any;
 };

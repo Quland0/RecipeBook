@@ -17,7 +17,7 @@ export function useRecipes() {
     return useQuery<Recipe[]>({
         queryKey: ["recipes"],
         queryFn: async () => {
-            const res = await api.get<StrapiListResponse<Recipe>>("/recipes?populate=*");
+            const res = await api.get<StrapiListResponse<Recipe>>("/recipes?populate[image][fields][0]=url&populate[category][fields][0]=name&populate[author][fields][0]=username");
             return res.data.data;
         },
         staleTime: 30_000,
