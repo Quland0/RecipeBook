@@ -1,23 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
 
 import { PageLoader } from "@/components/page/PageLoader";
 import { PageError } from "@/components/page/PageError";
+import { RecipeCard } from "@/components/recipes/RecipeCard";
 
 import { useCategories, useRecipes } from "@/api/queries";
 import type { Category, Recipe } from "@/types/recipe";
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:1337";
 
 const HomePage = () => {
     const [search, setSearch] = useState<string>("");
@@ -88,36 +80,7 @@ const HomePage = () => {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredRecipes.map((recipe) => (
-                        <Card key={recipe.id} className="overflow-hidden">
-                            {recipe.image && (
-                                <img
-                                    src={`${API_URL}${recipe.image.url}`}
-                                    alt={recipe.title}
-                                    className="w-full h-48 object-cover"
-                                    loading="lazy"
-                                />
-                            )}
-
-                            <CardHeader>
-                                <CardTitle>{recipe.title}</CardTitle>
-                            </CardHeader>
-
-                            <CardContent>
-                                <div className="flex items-center justify-between">
-                                    <Badge variant="secondary">
-                                        {recipe.category?.name ?? ""}
-                                    </Badge>
-
-                                    <p className="text-muted-foreground">{recipe.cookingTime} мин</p>
-                                </div>
-                            </CardContent>
-
-                            <CardFooter>
-                                <Button asChild>
-                                    <Link to={`/recipes/${recipe.documentId}`}>Открыть рецепт</Link>
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                        <RecipeCard key={recipe.id} recipe={recipe} />
                     ))}
                 </div>
             )}
