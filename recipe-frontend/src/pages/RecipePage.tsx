@@ -1,15 +1,21 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/api/axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { deleteRecipe } from "@/features/recipes/api/mutations";
+import { useAuth } from "@/features/auth/useAuth";
 import type { Recipe, StrapiResponse } from "@/types/recipe";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:1337";
+const API_URL =
+    import.meta.env.BASE_API_URL?.replace("/api", "") ??
+    "http://localhost:1337";
 
 export default function RecipePage() {
     const { documentId } = useParams<{ documentId: string }>();
+    const navigate = useNavigate();
+    const { user } = useAuth();
 
     const { data, isLoading, isError } = useQuery<Recipe>({
         queryKey: ["recipe", documentId],
@@ -22,6 +28,21 @@ export default function RecipePage() {
         enabled: !!documentId,
         retry: false,
     });
+
+    const isOwner = !!user && !!data?.author && user.id === data.author.id;
+
+    const handleDelete = async () => {
+        const confirmed = window.confirm("Удалить рецепт?");
+        if (!confirmed || !documentId) return;
+
+        try {
+            await deleteRecipe(documentId);
+            navigate("/");
+        } catch (error) {
+            console.error(error);
+            alert("Не удалось удалить рецепт");
+        }
+    };
 
     if (isLoading) {
         return (
@@ -47,9 +68,25 @@ export default function RecipePage() {
 
     return (
         <div className="p-10 max-w-3xl mx-auto space-y-6">
-            <Button asChild variant="outline" size="sm">
-                <Link to="/">Назад</Link>
-            </Button>
+            <div className="flex items-center gap-3 flex-wrap">
+                <Button asChild variant="outline" size="sm">
+                    <Link to="/">Назад</Link>
+                </Button>
+
+                {isOwner && (
+                    <>
+                        <Button asChild variant="outline" size="sm">
+                            <Link to={`/recipes/${data.documentId}/edit`}>
+                                Редактировать
+                            </Link>
+                        </Button>
+
+                        <Button variant="destructive" size="sm" onClick={handleDelete}>
+                            Удалить
+                        </Button>
+                    </>
+                )}
+            </div>
 
             {data.image && (
                 <img
@@ -68,12 +105,12 @@ export default function RecipePage() {
                 </Badge>
 
                 <span className="text-muted-foreground">
-          {data.cookingTime} мин
+          ⏱ {data.cookingTime} мин
         </span>
 
                 {data.author?.username && (
                     <span className="text-muted-foreground">
-             {data.author.username}
+            👤 {data.author.username}
           </span>
                 )}
             </div>
