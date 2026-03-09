@@ -8,7 +8,7 @@ import { PageLoader } from "@/components/page/PageLoader";
 import { PageError } from "@/components/page/PageError";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 
-import { useCategories, useRecipes } from "@/api/queries";
+import { useCategories, useRecipes } from "@/features/recipes/api/mutations";
 import type { Category, Recipe } from "@/types/recipe";
 
 const HomePage = () => {

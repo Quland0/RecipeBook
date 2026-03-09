@@ -1,17 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCategories } from "@/api/queries";
 import { useAuth } from "@/features/auth/useAuth";
-import { createRecipe, uploadImage } from "@/features/recipes/api/mutations";
+import {
+    useCategories,
+    useCreateRecipe,
+    useUploadImage,
+} from "@/features/recipes/api/mutations";
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { PageError } from "@/components/page/PageError";
 
 export default function CreateRecipePage() {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const categoriesQuery = useCategories();
 
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const categoriesQuery = useCategories();
+    const uploadImageMutation = useUploadImage();
+    const createRecipeMutation = useCreateRecipe();
+
     const [error, setError] = useState<string>("");
 
     if (categoriesQuery.isLoading) {
@@ -44,16 +49,14 @@ export default function CreateRecipePage() {
         }
 
         try {
-            setIsSubmitting(true);
-
             let uploadedImageId: number | undefined;
 
             if (values.image) {
-                const uploadedFile = await uploadImage(values.image);
+                const uploadedFile = await uploadImageMutation.mutateAsync(values.image);
                 uploadedImageId = uploadedFile.id;
             }
 
-            const createdRecipe = await createRecipe({
+            const createdRecipe = await createRecipeMutation.mutateAsync({
                 title: values.title,
                 description: values.description,
                 cookingTime: Number(values.cookingTime),
@@ -66,8 +69,6 @@ export default function CreateRecipePage() {
         } catch (err) {
             console.error(err);
             setError("Не удалось создать рецепт");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -77,7 +78,9 @@ export default function CreateRecipePage() {
 
             <RecipeForm
                 categories={categories}
-                isSubmitting={isSubmitting}
+                isSubmitting={
+                    uploadImageMutation.isPending || createRecipeMutation.isPending
+                }
                 error={error}
                 submitLabel="Создать рецепт"
                 onSubmit={handleSubmit}

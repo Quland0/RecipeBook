@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api/axios";
-import { useCategories } from "@/api/queries";
-import { uploadImage, updateRecipe } from "@/features/recipes/api/mutations";
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { PageError } from "@/components/page/PageError";
-import type { Recipe, StrapiResponse } from "@/types/recipe";
+import {
+    useCategories,
+    useRecipe,
+    useUpdateRecipe,
+    useUploadImage,
+} from "@/features/recipes/api/mutations";
 
 const STRAPI_URL =
     import.meta.env.BASE_API_URL?.replace("/api", "") ??
@@ -16,22 +17,12 @@ export default function EditRecipePage() {
     const { documentId } = useParams<{ documentId: string }>();
     const navigate = useNavigate();
 
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
     const categoriesQuery = useCategories();
-
-    const recipeQuery = useQuery<Recipe>({
-        queryKey: ["recipe", documentId],
-        queryFn: async () => {
-            const res = await api.get<StrapiResponse<Recipe>>(
-                `/recipes/${documentId}?populate[image][fields][0]=url&populate[category][fields][0]=name&populate[author][fields][0]=username`
-            );
-            return res.data.data;
-        },
-        enabled: !!documentId,
-        retry: false,
-    });
+    const recipeQuery = useRecipe(documentId);
+    const uploadImageMutation = useUploadImage();
+    const updateRecipeMutation = useUpdateRecipe();
 
     if (categoriesQuery.isLoading || recipeQuery.isLoading) {
         return <div className="p-10">Загрузка...</div>;
@@ -64,29 +55,28 @@ export default function EditRecipePage() {
         }
 
         try {
-            setIsSubmitting(true);
-
             let uploadedImageId: number | undefined;
 
             if (values.image) {
-                const uploadedFile = await uploadImage(values.image);
+                const uploadedFile = await uploadImageMutation.mutateAsync(values.image);
                 uploadedImageId = uploadedFile.id;
             }
 
-            const updatedRecipe = await updateRecipe(documentId!, {
-                title: values.title,
-                description: values.description,
-                cookingTime: Number(values.cookingTime),
-                category: Number(values.categoryId),
-                ...(uploadedImageId ? { image: uploadedImageId } : {}),
+            const updatedRecipe = await updateRecipeMutation.mutateAsync({
+                documentId: documentId!,
+                payload: {
+                    title: values.title,
+                    description: values.description,
+                    cookingTime: Number(values.cookingTime),
+                    category: Number(values.categoryId),
+                    ...(uploadedImageId ? { image: uploadedImageId } : {}),
+                },
             });
 
             navigate(`/recipes/${updatedRecipe.documentId}`);
         } catch (err) {
             console.error(err);
             setError("Не удалось обновить рецепт");
-        } finally {
-            setIsSubmitting(false);
         }
     };
 
@@ -96,7 +86,9 @@ export default function EditRecipePage() {
 
             <RecipeForm
                 categories={categories}
-                isSubmitting={isSubmitting}
+                isSubmitting={
+                    uploadImageMutation.isPending || updateRecipeMutation.isPending
+                }
                 error={error}
                 submitLabel="Сохранить изменения"
                 initialValues={{
