@@ -5,8 +5,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { AuthResponse, AuthUser } from "./auth.types";
-import { loginUser, registerUser } from "./auth.api";
+import type { AuthResponse, AuthUser } from "../types/auth.types.ts";
+import { loginUser, registerUser } from "../features/auth/auth.api.ts";
 
 type AuthContextType = {
   user: AuthUser | null;

@@ -5,7 +5,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import CreateRecipePage from "../pages/CreateRecipePage";
 import EditRecipePage from "../pages/EditRecipePage";
-import { ProtectedRoute } from "../features/auth/ProtectedRoute";
+import { ProtectedRoute } from "../features/ProtectedRoute.tsx";
 import { AppLayout } from "../components/layout/AppLayout";
 
 export const router = createBrowserRouter([

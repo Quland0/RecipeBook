@@ -2,8 +2,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDeleteRecipe, useRecipe } from "@/features/recipes/api/mutations";
-import { useAuth } from "@/features/auth/useAuth";
+import { useRecipe } from "@/api/recipes/recipes.queries";
+import { useDeleteRecipe } from "@/api/recipes/recipes.mutations";
+import { useAuth } from "@/features/hooks/useAuth.ts";
 
 const API_URL =
   import.meta.env.BASE_API_URL?.replace("/api", "") ?? "http://localhost:1337";

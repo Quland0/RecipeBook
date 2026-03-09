@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/hooks/useAuth.ts";
+import { useCategories } from "@/api/categories/categories.queries";
 import {
-  useCategories,
   useCreateRecipe,
   useUploadImage,
-} from "@/features/recipes/api/mutations";
+} from "@/api/recipes/recipes.mutations";
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { PageError } from "@/components/page/PageError";
 

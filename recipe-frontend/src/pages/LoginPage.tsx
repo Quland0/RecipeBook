@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "@/features/auth/useAuth";
+import { useAuth } from "@/features/hooks/useAuth.ts";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
