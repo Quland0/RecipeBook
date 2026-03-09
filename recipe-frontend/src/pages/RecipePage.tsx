@@ -1,12 +1,12 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/api/axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { deleteRecipe } from "@/features/recipes/api/mutations";
+import {
+    useDeleteRecipe,
+    useRecipe,
+} from "@/features/recipes/api/mutations";
 import { useAuth } from "@/features/auth/useAuth";
-import type { Recipe, StrapiResponse } from "@/types/recipe";
 
 const API_URL =
     import.meta.env.BASE_API_URL?.replace("/api", "") ??
@@ -17,17 +17,8 @@ export default function RecipePage() {
     const navigate = useNavigate();
     const { user } = useAuth();
 
-    const { data, isLoading, isError } = useQuery<Recipe>({
-        queryKey: ["recipe", documentId],
-        queryFn: async () => {
-            const res = await api.get<StrapiResponse<Recipe>>(
-                `/recipes/${documentId}?populate[image][fields][0]=url&populate[category][fields][0]=name&populate[author][fields][0]=username`
-            );
-            return res.data.data;
-        },
-        enabled: !!documentId,
-        retry: false,
-    });
+    const { data, isLoading, isError } = useRecipe(documentId);
+    const deleteRecipeMutation = useDeleteRecipe();
 
     const isOwner = !!user && !!data?.author && user.id === data.author.id;
 
@@ -36,7 +27,7 @@ export default function RecipePage() {
         if (!confirmed || !documentId) return;
 
         try {
-            await deleteRecipe(documentId);
+            await deleteRecipeMutation.mutateAsync(documentId);
             navigate("/");
         } catch (error) {
             console.error(error);
@@ -81,8 +72,13 @@ export default function RecipePage() {
                             </Link>
                         </Button>
 
-                        <Button variant="destructive" size="sm" onClick={handleDelete}>
-                            Удалить
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDelete}
+                            disabled={deleteRecipeMutation.isPending}
+                        >
+                            {deleteRecipeMutation.isPending ? "Удаление..." : "Удалить"}
                         </Button>
                     </>
                 )}
@@ -105,13 +101,13 @@ export default function RecipePage() {
                 </Badge>
 
                 <span className="text-muted-foreground">
-          ⏱ {data.cookingTime} мин
-        </span>
+                    {data.cookingTime} мин
+                </span>
 
                 {data.author?.username && (
-                    <span className="text-muted-foreground">
-            👤 {data.author.username}
-          </span>
+                <span className="text-muted-foreground">
+                {data.author.username}
+                </span>
                 )}
             </div>
 
