@@ -3,15 +3,15 @@ import type { ReactNode } from "react";
 import { useAuth } from "@/features/auth/useAuth";
 
 type ProtectedRouteProps = {
-    children: ReactNode;
+  children: ReactNode;
 };
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-    const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
-    return <>{children}</>;
+  return <>{children}</>;
 }
