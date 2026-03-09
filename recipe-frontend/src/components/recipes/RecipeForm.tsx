@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import type { Category } from "@/types/recipe";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 type RecipeFormValues = {
     title: string;
@@ -76,11 +84,11 @@ export function RecipeForm({
                 onChange={(e) => handleChange("title", e.target.value)}
             />
 
-            <textarea
-                placeholder="Описание"
+            <Textarea
+                placeholder="Описание рецепта"
                 value={form.description}
                 onChange={(e) => handleChange("description", e.target.value)}
-                className="w-full min-h-40 rounded-md border bg-background px-3 py-2 text-sm"
+                className="min-h-40"
             />
 
             <Input
@@ -90,18 +98,22 @@ export function RecipeForm({
                 onChange={(e) => handleChange("cookingTime", e.target.value)}
             />
 
-            <select
+            <Select
                 value={form.categoryId}
-                onChange={(e) => handleChange("categoryId", e.target.value)}
-                className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                onValueChange={(value) => handleChange("categoryId", value)}
             >
-                <option value="">Выбери категорию</option>
-                {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                        {category.name}
-                    </option>
-                ))}
-            </select>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Выбери категорию" />
+                </SelectTrigger>
+
+                <SelectContent>
+                    {categories.map((category) => (
+                        <SelectItem key={category.id} value={String(category.id)}>
+                            {category.name}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
 
             <Input
                 type="file"
