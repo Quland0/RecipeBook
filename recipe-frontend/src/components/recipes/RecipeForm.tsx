@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { Category } from "@/types/recipe";
+import type { Category } from "@/types/recipe.types.ts";
 import {
   Select,
   SelectContent,

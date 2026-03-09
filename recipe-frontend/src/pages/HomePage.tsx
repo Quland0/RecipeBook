@@ -8,8 +8,9 @@ import { PageLoader } from "@/components/page/PageLoader";
 import { PageError } from "@/components/page/PageError";
 import { RecipeCard } from "@/components/recipes/RecipeCard";
 
-import { useCategories, useRecipes } from "@/features/recipes/api/mutations";
-import type { Category, Recipe } from "@/types/recipe";
+import { useCategories } from "@/api/categories/categories.queries";
+import { useRecipes } from "@/api/recipes/recipes.queries";
+import type { Category, RecipeTypes } from "@/types/recipe.types.ts";
 
 const HomePage = () => {
   const [search, setSearch] = useState<string>("");
@@ -24,7 +25,7 @@ const HomePage = () => {
   if (isLoading) return <PageLoader />;
   if (isError) return <PageError />;
 
-  const recipes: Recipe[] = recipesQuery.data ?? [];
+  const recipes: RecipeTypes[] = recipesQuery.data ?? [];
   const categories: Category[] = categoriesQuery.data ?? [];
 
   const filteredRecipes = recipes

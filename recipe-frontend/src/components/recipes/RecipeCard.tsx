@@ -8,12 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { Recipe } from "@/types/recipe";
+import type { RecipeTypes } from "@/types/recipe.types.ts";
 
 const API_URL = import.meta.env.BASE_API_URL ?? "http://localhost:1337";
 
 type RecipeCardProps = {
-  recipe: Recipe;
+  recipe: RecipeTypes;
 };
 
 export function RecipeCard({ recipe }: RecipeCardProps) {

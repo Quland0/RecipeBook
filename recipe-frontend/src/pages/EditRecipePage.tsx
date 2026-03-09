@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { RecipeForm } from "@/components/recipes/RecipeForm";
 import { PageError } from "@/components/page/PageError";
+import { useCategories } from "@/api/categories/categories.queries";
+import { useRecipe } from "@/api/recipes/recipes.queries";
 import {
-  useCategories,
-  useRecipe,
   useUpdateRecipe,
   useUploadImage,
-} from "@/features/recipes/api/mutations";
+} from "@/api/recipes/recipes.mutations";
 
 const STRAPI_URL =
   import.meta.env.BASE_API_URL?.replace("/api", "") ?? "http://localhost:1337";
