@@ -19,3 +19,4 @@ export type RegisterPayload = {
     email: string;
     password: string;
 };
+// вынести в файл с типами
